@@ -76,3 +76,71 @@ export function getBlockedAST(program: Program){
         return newBlock;
     }
 }
+
+
+
+interface Macro{
+    id: string,
+    sig: Type[][],
+    map(args: Expression[], compile: (expr: Expression) => string, innerCode: Block): string;
+}
+
+var macros = <Macro[]>[{
+    id: "on",
+    map: (args, compile, innerCode) => {
+        if(_.last(args).type !== "Id"){
+            throw error("Last element of the on macro must be an identifier");
+        }
+
+        var funcName = args.slice(0, -1).map(compile).join(".");
+
+        return `$(funcName)(function() {\n$(compile(innerCode))\n})`
+    }
+},{
+    id: "if",
+    map: (args, compile, innerCode) => {
+        if(args.length !== 1){
+            throw error("If is being passed more than one expression");
+        }
+        var predicate = compile(args[0]);
+
+        return `if($(predicate)){\n$(compile(innerCode))\n}`
+    }
+}];
+
+export function compileProgram(program: Program){
+    return compileBlock({
+        code: program.code,
+        type: "Block"
+    });
+}
+
+function compileBlock(block: Block){
+    for(var i = 0;i < block.code.length;i++){
+        var _line = block[i];
+        if(_line.type === "Macro"){
+            return (line => {
+                var potentialMacro = _.find(macros, macro => macro.id == line.id.text);
+                
+                if(potentialMacro === undefined){
+                    throw error("Undefined macro ${macro.id}");
+                }
+
+                var macroBlock = block.code[i + 1];
+                if(macroBlock === undefined || macroBlock.type !== "Block"){
+                    throw error("Block not found after macro");
+                }
+
+                return potentialMacro.map(
+                    line.args,
+                    compileExpression,
+                    macroBlock
+                )
+            })(_line);
+        }
+    }
+}
+
+export function compileExpression(expression: Expression): string{
+    return "";
+}
