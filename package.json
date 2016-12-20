@@ -1,0 +1,16 @@
+{
+  "name": "jql",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm run-script build && cd test && node test",
+    "build": "pegjs lang.pegjs dist/parser.js",
+    "prepublish": "npm run build"
+  },
+  "author": "Thomas Hickman",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^6.0.52"
+  }
+}
