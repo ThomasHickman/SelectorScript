@@ -82,7 +82,7 @@ export function getBlockedAST(program: Program){
 interface Macro{
     id: string,
     sig: Type[][],
-    map(args: Expression[], compile: (expr: Expression) => string, innerCode: Block): string;
+    map(args: Expression[], compile: (expr: Expression) => string, innerCode: string): string;
 }
 
 var macros = <Macro[]>[{
@@ -94,7 +94,7 @@ var macros = <Macro[]>[{
 
         var funcName = args.slice(0, -1).map(compile).join(".");
 
-        return `$(funcName)(function() {\n$(compile(innerCode))\n})`
+        return `${funcName}(function() {\n${innerCode}\n});`
     }
 },{
     id: "if",
@@ -104,7 +104,7 @@ var macros = <Macro[]>[{
         }
         var predicate = compile(args[0]);
 
-        return `if($(predicate)){\n$(compile(innerCode))\n}`
+        return `if(${predicate}){\n${innerCode}\n}`
     }
 }];
 
@@ -116,10 +116,12 @@ export function compileProgram(program: Program){
 }
 
 function compileBlock(block: Block){
+    var code: string[] = [];
+
     for(var i = 0;i < block.code.length;i++){
-        var _line = block[i];
+        var _line = block.code[i];
         if(_line.type === "Macro"){
-            return (line => {
+            (line => {
                 var potentialMacro = _.find(macros, macro => macro.id == line.id.text);
                 
                 if(potentialMacro === undefined){
@@ -131,16 +133,34 @@ function compileBlock(block: Block){
                     throw error("Block not found after macro");
                 }
 
-                return potentialMacro.map(
+                code.push(line.tabs + potentialMacro.map(
                     line.args,
                     compileExpression,
-                    macroBlock
-                )
+                    compileBlock(macroBlock)
+                ));
+
+                i++;
             })(_line);
         }
+        else if(_line.type === "SelectorStatement"){
+            code.push(_line.tabs + compileSelectorStatement(_line));
+        }
     }
+
+    return code.join("\n");
 }
 
-export function compileExpression(expression: Expression): string{
+function compileSelectorStatement(stm: SelectorStatement){
+    var jsSelector = compileSelector(stm.selector);
+    var args = stm.args.map(compileExpression).join(", ");
+
+    return `$("${jsSelector}").${stm.func.text}(args);`
+}
+
+function compileExpression(expression: Expression): string{
+    return "";
+}
+
+function compileSelector(selector: Selector): string{
     return "";
 }

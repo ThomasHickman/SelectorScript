@@ -33,7 +33,7 @@ interface SelectorStatement extends StatementSkeleton{
     type: "SelectorStatement",
     selector: Selector,
     func: Id,
-    args: Expression
+    args: Expression[]
 }
 
 interface BlockComment extends StatementSkeleton{
