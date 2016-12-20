@@ -118,6 +118,14 @@ export function compileProgram(program: Program){
 function compileBlock(block: Block){
     var code: string[] = [];
 
+    function addStyle(line: Statement, generatedCode: string){
+        var commentRegion = "";
+        if(line.lineComment){
+            commentRegion = `  //${line.lineComment}`;
+        }
+        return `${line.tabs}${generatedCode}${commentRegion}`;
+    }
+
     for(var i = 0;i < block.code.length;i++){
         var _line = block.code[i];
         if(_line.type === "Macro"){
@@ -133,17 +141,22 @@ function compileBlock(block: Block){
                     throw error("Block not found after macro");
                 }
 
-                code.push(line.tabs + potentialMacro.map(
+                var macroOutputLines = potentialMacro.map(
                     line.args,
                     compileExpression,
                     compileBlock(macroBlock)
-                ));
+                ).split("\n");
+
+                code.push([
+                    addStyle(line, macroOutputLines[0]),
+                    ...macroOutputLines.slice(1)
+                ].join("\n"));
 
                 i++;
             })(_line);
         }
         else if(_line.type === "SelectorStatement"){
-            code.push(_line.tabs + compileSelectorStatement(_line));
+            code.push(addStyle(_line, compileSelectorStatement(_line)) + ";");
         }
     }
 
