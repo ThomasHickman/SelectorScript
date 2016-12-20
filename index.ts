@@ -17,7 +17,7 @@ function error(message: string){
     return new Error(message);
 }
 
-function getBlockedAST(program: Program, currentTabLevel = 0){
+export function getBlockedAST(program: Program){
     var tab: string[] | null = null;// as array for easy processing
     var i = 0;
 
@@ -36,7 +36,7 @@ function getBlockedAST(program: Program, currentTabLevel = 0){
         for(;i < program.code.length;i++){
             var line = <Statement>program.code[i];
 
-            if(line.tabs === ""){
+            if(line.tabs === "" && tab === null){
                 newBlock.code.push(line);
             }
             else{
@@ -46,23 +46,28 @@ function getBlockedAST(program: Program, currentTabLevel = 0){
 
                 var tabArray = _.chunk(line.tabs, tab.length);
 
-                if(!tabArray.every(x => _.isEqual(tab, x))){
+                if(line.type === "Blank"){
+                    newBlock.code.push(line);
+                }
+                else if(!tabArray.every(x => _.isEqual(tab, x))){
                     throw error("Parse Error: Uneven tabbing");
                 }
                 else{
-                    if(tabArray.length === tabLevel || line.type === "Blank"){
+                    if(tabArray.length === tabLevel){
                         newBlock.code.push(line);
                     }
                     else if(tabArray.length === tabLevel + 1){
                         newBlock.code.push(getBlocks(tabLevel + 1))
                     }
-                    else if(tabArray.length === tabLevel - 1){
+                    else if(tabArray.length < tabLevel){
+                        i--;
                         return newBlock;
                     }
                     else{
-                        throw error(`Parse Error: Cannot have a gap of more than ${
-                            Math.abs(tabArray.length - tabLevel)
-                        } between succesive indentations`)
+                        throw error(`Parse Error: Cannot have a gap of more than 1 between succesive indentations\n` +
+                            `Found a gap of ${
+                                Math.abs(tabArray.length - tabLevel)
+                            }`)
                     }
                 }
             }
