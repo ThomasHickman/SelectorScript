@@ -124,7 +124,10 @@ ClassSelector = "." Id
 ElementSelector = "$" Id
 
 Id = [a-zA-Z_] [a-zA-Z_0-9]* {
-    return text()
+    return {
+        id: "Selector"
+        text: text()
+    }
 }
 
 Tabs = _
