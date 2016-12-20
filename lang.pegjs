@@ -1,36 +1,50 @@
-Program = Statement*
+Program = Code {}
 
-Statement = EventListener / IfStatement / SelectorRule
+Code = Statement (NewLine Statement)*
 
-EventListener = BasicEventListener / ComplexEventListener
+Statement = Tabs (Macro / SelectorStatement / LineComment / BlockComment / Blank)
 
-BasicEventListener = "on" _ id
+// Statements
 
-ComplexEventListener = "on" Selector id
+Macro = Id (_ (Expression))*
+SelectorStatement = Selector _ Id _ Expression?
+LineComment = _ "//" AnythingSameLine
+Blank = ""
+BlockComment = "/*" (!"/*" .)* "*/"
 
+Expression = Id / String / Selector / Object
 
+// Expressions
 
 Selector = IDSelector / ClassSelector / ElementSelector
+String = "'" SingleStringCharacter* "'" / '"' DoubleStringCharacter* '"'
 
-IDSelector = "#" id
+DoubleStringCharacter = (!('"' / "\\" ) .) / '\\"' / "\\\\"
 
-ClassSelector = "." id
+SingleStringCharacter = (!("'" / "\\") .) / "\\'" / "\\\\"
 
-ElementSelector = "$" id
+Object = "{" __ PropertyList __ "}"
 
+PropertyList = Property (__ "," __ Property)*
 
+Property = (String / Id) __ ":" __ Expression
 
-IfStatement = "7"
+// Selectors
 
+IDSelector = "#" Id
+ClassSelector = "." Id
+ElementSelector = "$" Id
 
+Id = [a-zA-Z_] [a-zA-Z_0-9]*
 
-SelectorRule = "8"
+Tabs = _
 
+NewLine = [\n]
 
-id = [a-zA-Z_] [a-zA-Z_0-9]*
+AnythingSameLine = (!("\n") .)*
 
 _ "whitespace"
   = [ \t]*
 
-__ "whitespace_newline"
-  = [ \t\n\r]*
+__ "whitespace with a new line"
+  = ([ \t] / NewLine)*
