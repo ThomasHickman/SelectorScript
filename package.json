@@ -11,6 +11,11 @@
   "author": "Thomas Hickman",
   "license": "MIT",
   "devDependencies": {
-    "@types/node": "^6.0.52"
+    "@types/node": "^6.0.52",
+    "@types/pegjs": "^0.10.0",
+    "jasmine": "^2.5.2"
+  },
+  "dependencies": {
+    "lodash": "^4.17.2"
   }
 }

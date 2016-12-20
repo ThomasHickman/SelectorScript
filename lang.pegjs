@@ -10,7 +10,7 @@ Program = head:Statement tail:(NewLine Statement)* {
     var statements = tail.map
     return {
         type: "Program",
-        statements: tail.map(x => x[1]),
+        code: tail.map(x => x[1]),
         newLines: tail.map(x => x[0])
     }
 }
@@ -49,21 +49,23 @@ SelectorStatement = selector: Selector _ func: Id args:(_ Expression)* {
     }
 }
 
-LineComment = _ "//" AnythingSameLine { 
+LineComment = _ "//" text:AnythingSameLine { 
     return {
-        type: "LineComment"
+        type: "LineComment",
+        text: text
+    }
+}
+
+BlockComment = "/*" content: (!"/*" .)* "*/" { 
+    return {
+        type: "BlockComment",
+        content: string
     }
 }
 
 Blank = "" { 
     return {
         type: "Blank"
-    }
-}
-
-BlockComment = "/*" (!"/*" .)* "*/" { 
-    return {
-        type: "BlockComment"
     }
 }
 
