@@ -4,15 +4,16 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "npm run-script build && cd test && node test",
+    "test": "npm run-script build && jasmine",
     "build": "pegjs lang.pegjs dist/parser.js",
     "prepublish": "npm run build"
   },
   "author": "Thomas Hickman",
   "license": "MIT",
   "devDependencies": {
+    "@types/jasmine": "^2.5.38",
+    "@types/lodash": "^4.14.44",
     "@types/node": "^6.0.52",
-    "@types/pegjs": "^0.10.0",
     "jasmine": "^2.5.2"
   },
   "dependencies": {
