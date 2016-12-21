@@ -2,8 +2,8 @@ import macros from './macros';
 import { error } from './common';
 import * as _ from 'lodash';
 
-export function compileProgram(program: Program){
-    var innerBlockLines = compileBlock({
+export function generateProgram(program: Program){
+    var innerBlockLines = generateBlock({
         code: program.code,
         type: "Block"
     }).split("\n");
@@ -13,7 +13,7 @@ export function compileProgram(program: Program){
     return `$(function(){\n${newInnerBlock}\n})`;
 }
 
-function compileBlock(block: Block){
+function generateBlock(block: Block){
     var code: string[] = [];
 
     function addStyle(line: Statement, generatedCode: string){
@@ -41,8 +41,8 @@ function compileBlock(block: Block){
 
                 var macroOutputLines = potentialMacro.map(
                     line.args,
-                    compileExpression,
-                    compileBlock(macroBlock)
+                    generateExpression,
+                    generateBlock(macroBlock)
                 ).split("\n");
 
                 code.push([
@@ -54,21 +54,21 @@ function compileBlock(block: Block){
             })(_line);
         }
         else if(_line.type === "SelectorStatement"){
-            code.push(addStyle(_line, compileSelectorStatement(_line)) + ";");
+            code.push(addStyle(_line, generateSelectorStatement(_line)) + ";");
         }
     }
 
     return code.join("\n");
 }
 
-function compileSelectorStatement(stm: SelectorStatement){
-    var jsSelector = compileSelector(stm.selector);
-    var args = stm.args.map(compileExpression).join(", ");
+function generateSelectorStatement(stm: SelectorStatement){
+    var jsSelector = generateSelector(stm.selector);
+    var args = stm.args.map(generateExpression).join(", ");
 
     return `${jsSelector}.${stm.func.text}(${args})`
 }
 
-function compileExpression(expr: Expression): string{
+function generateExpression(expr: Expression): string{
     if(expr.type === "String"){
         return `${expr.code}`// TODO: fix this
     }
@@ -76,17 +76,17 @@ function compileExpression(expr: Expression): string{
         return expr.text;
     }
     else if(expr.type === "Selector"){
-        return compileSelector(expr);
+        return generateSelector(expr);
     }
     else{
-        return compileObject(expr);
+        return generateObject(expr);
     }
 }
 
-function compileSelector(selector: Selector): string{
+function generateSelector(selector: Selector): string{
     return `$("${selector.text}")`;
 }
 
-function compileObject(object: IObject): string{
+function generateObject(object: IObject): string{
     throw error("Not implemented");
 }
