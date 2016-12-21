@@ -51,4 +51,4 @@ $(function(){
 - [ ] Add functions (as a macro)
 - [ ] Add object literals
 - [ ] Add array literals
-- [ ] Cutomise literals?
+- [ ] Customise literals?
