@@ -69,7 +69,9 @@ Blank = "" {
     }
 }
 
-Expression = Id / String / Selector / Object
+Expression = Literal+
+
+Literal = Id / String / Selector / Object / Symbol
 
 // Expressions
 
@@ -99,6 +101,7 @@ DoubleString = '"' txt: (DoubleStringCharacter*) '"'{
 DoubleStringCharacter = (!('"' / "\\" ) .) / '\\"' / "\\\\"{
     return text()
 }
+
 SingleStringCharacter = (!("'" / "\\") .) / "\\'" / "\\\\"{
     return text()
 }
@@ -121,6 +124,8 @@ Property = name: (String / Id) __ ":" __ expr:Expression {
         expr: expr
     }
 }
+
+Symbol = [!£%^&*-+=@~#|\¬,.?]+
 
 // Selectors
 
