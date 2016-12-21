@@ -1,4 +1,4 @@
-import { compileProgram } from './code-generate';
+import { compileProgram } from './generate';
 import { parse } from './parse';
 
 export default function compile(ssCode: string) {
