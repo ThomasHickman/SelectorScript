@@ -14,7 +14,10 @@ interface Parser{
 }
 
 function error(message: string){
-    return new Error(message);
+    return {
+        ssGenerated: true,
+        message: message
+    };
 }
 
 export function getBlockedAST(program: Program){
@@ -92,7 +95,7 @@ var macros = <Macro[]>[{
             throw error("Last element of the on macro must be an identifier");
         }
 
-        var funcName = args.slice(0, -1).map(compile).join(".");
+        var funcName = args.slice(0).map(compile).join(".");
 
         return `${funcName}(function() {\n${innerCode}\n});`
     }
@@ -109,10 +112,14 @@ var macros = <Macro[]>[{
 }];
 
 export function compileProgram(program: Program){
-    return compileBlock({
+    var innerBlockLines = compileBlock({
         code: program.code,
         type: "Block"
-    });
+    }).split("\n");
+
+    var newInnerBlock = innerBlockLines.map(x => "    " + x).join("\n");
+
+    return `$(function(){\n${newInnerBlock}\n})`;
 }
 
 function compileBlock(block: Block){
@@ -133,7 +140,7 @@ function compileBlock(block: Block){
                 var potentialMacro = _.find(macros, macro => macro.id == line.id.text);
                 
                 if(potentialMacro === undefined){
-                    throw error("Undefined macro ${macro.id}");
+                    throw error(`Undefined macro ${line.id.text}`);
                 }
 
                 var macroBlock = block.code[i + 1];
@@ -167,13 +174,74 @@ function compileSelectorStatement(stm: SelectorStatement){
     var jsSelector = compileSelector(stm.selector);
     var args = stm.args.map(compileExpression).join(", ");
 
-    return `$("${jsSelector}").${stm.func.text}(args);`
+    return `${jsSelector}.${stm.func.text}(${args})`
 }
 
-function compileExpression(expression: Expression): string{
-    return "";
+function compileExpression(expr: Expression): string{
+    if(expr.type === "String"){
+        return `${expr.code}`// TODO: fix this
+    }
+    else if(expr.type === "Id"){
+        return expr.text;
+    }
+    else if(expr.type === "Selector"){
+        return compileSelector(expr);
+    }
+    else{
+        return compileObject(expr);
+    }
 }
 
 function compileSelector(selector: Selector): string{
-    return "";
+    return `$("${selector.text}")`;
+}
+
+function compileObject(object: IObject): string{
+    throw error("Not implemented");
+}
+
+function pegJSErrorToString(e: any){
+    function locStr({line, column}){
+        return `${line}:${column}`
+    }
+    return `Parse Error: ${e.name}: ${locStr(e.location.start)}-${locStr(e.location.end)}\n${e.message}`
+}
+if(typeof window !== "undefined"){
+    window["compile"] = compile;
+}
+
+export function compile(ssCode: string) {
+    try{
+        var simpleAST = parser.parse(ssCode)
+    }
+    catch(e){
+        if(e.location === undefined){
+            throw e
+        }
+        else{
+            return {
+                success: false,
+                error: pegJSErrorToString(e)
+            };
+        }
+    }
+    try{
+        var AST = getBlockedAST(simpleAST);
+        var output = compileProgram(AST);
+    }
+    catch(e){
+        if(!e.ssGenerated){
+            throw e;
+        }
+
+        return {
+            success: false,
+            error: e
+        }
+    }
+
+    return {
+        success: true,
+        output: output
+    }
 }

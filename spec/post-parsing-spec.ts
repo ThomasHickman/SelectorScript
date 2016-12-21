@@ -26,6 +26,8 @@ describe("post parsing test", () => {
 
     it("reports bad indentation", () => {
         var basicAST = <Program>parser.parse(errorTest);
-        expect(() => getBlockedAST(basicAST)).toThrowError(/Parse/);
+        expect(() => getBlockedAST(basicAST)).toThrow(jasmine.objectContaining({
+            ssGenerated: true
+        }))
     })
 })

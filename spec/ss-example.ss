@@ -1,5 +1,5 @@
 on ready
-    on $div click
+    on @div click
         if #input shows "hello"
             #input addClass 'class-name'
 

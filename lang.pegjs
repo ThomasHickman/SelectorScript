@@ -73,17 +73,18 @@ Expression = Id / String / Selector / Object
 
 // Expressions
 
-Selector = (IDSelector / ClassSelector / ElementSelector){
+Selector = selector: (IDSelector / ClassSelector / ElementSelector){
     return {
         type: "Selector",
-        text: text()
+        text: selector
     }
 }
 
 String = str: (SingleString / DoubleString) {
     return {
         type: "String",
-        text: str
+        text: str, // TODO: fix this
+        code: text()
     }
 }
 
@@ -95,8 +96,12 @@ DoubleString = '"' txt: (DoubleStringCharacter*) '"'{
     return txt.join("")
 }
 
-DoubleStringCharacter = (!('"' / "\\" ) .) / '\\"' / "\\\\"
-SingleStringCharacter = (!("'" / "\\") .) / "\\'" / "\\\\"
+DoubleStringCharacter = (!('"' / "\\" ) .) / '\\"' / "\\\\"{
+    return text()
+}
+SingleStringCharacter = (!("'" / "\\") .) / "\\'" / "\\\\"{
+    return text()
+}
 
 Object = "{" __ properties: PropertyList __ "}"{
     return {
@@ -119,13 +124,19 @@ Property = name: (String / Id) __ ":" __ expr:Expression {
 
 // Selectors
 
-IDSelector = "#" Id
-ClassSelector = "." Id
-ElementSelector = "$" Id
+IDSelector = "#" Id{
+    return text();
+}
+ClassSelector = "." Id{
+    return text();
+}
+ElementSelector = "@" id: Id{
+    return id.text;
+}
 
 Id = [a-zA-Z_] [a-zA-Z_0-9]* {
     return {
-        id: "Selector"
+        type: "Id",
         text: text()
     }
 }

@@ -47,16 +47,17 @@ interface Blank extends StatementSkeleton{
 
 type Type = "Id" | "String" | "Selector" | "Object";
 
-type Expression = Id | String | Selector | IObject
+type Expression = Id | IString | Selector | IObject
 
 interface Selector{
     type: "Selector",
     text: string
 }
 
-interface String{
-    type: "String",
-    text: string
+interface IString{
+    type: "String";
+    text: string;
+    code: string;
 }
 
 interface IObject{
