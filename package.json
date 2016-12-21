@@ -1,8 +1,9 @@
 {
-  "name": "jql",
+  "name": "selector-script",
   "version": "0.0.1",
-  "description": "",
+  "description": "A compile to JavaScript language designed for web designers and people who are unfamiliar with JavaScript",
   "main": "dist/index.js",
+  "private": true,
   "scripts": {
     "test": "npm run-script build && jasmine",
     "build": "pegjs lang.pegjs dist/parser.js",
