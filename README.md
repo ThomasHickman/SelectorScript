@@ -43,6 +43,7 @@ $(function(){
 - [ ] Add atom and vscode extentions
 - [ ] Test a lot
 - [ ] Add documentation
+- [ ] Think of a better name
 
 ### Future versions
 - [ ] Add parsing of unary expressions (this makes selectors not be special)
