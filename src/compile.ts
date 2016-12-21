@@ -1,10 +1,10 @@
-import { compileProgram } from './generate';
+import generateProgram from './generate';
 import { parse } from './parse';
 
 export default function compile(ssCode: string) {
     try{
         var AST = parse(ssCode);
-        var output = compileProgram(AST);
+        var output = generateProgram(AST);
     }
     catch(e){
         if(!e.ssGenerated){

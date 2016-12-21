@@ -2,7 +2,7 @@ import macros from './macros';
 import { error } from './common';
 import * as _ from 'lodash';
 
-export function generateProgram(program: Program){
+export default function generateProgram(program: Program){
     var innerBlockLines = generateBlock({
         code: program.code,
         type: "Block"
