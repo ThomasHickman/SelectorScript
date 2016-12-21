@@ -1,8 +1,8 @@
 # SelectorScript
 
-A compile to JavaScript language designed for web designers and people who are unfamiliar with JavaScript.
+A compile to JavaScript language designed for web designers and beginners to JavaScript.
 
-***WARNING: This project is currently in development, any proposed language feature could change and ***
+***WARNING: This project is currently in development, the language specification and code is unstable***
 
 ## Example
 
@@ -16,7 +16,7 @@ on #submitButton click
         #nameError removeClass "hide"
 .option draggable {snap: ".dest"}
 ```
-### Proposed compiled JavaScript
+### Compiled JavaScript with `selectorOutput: jQuery`
 ``` javascript
 $(function(){
     $("#submitButton").click(function() {
