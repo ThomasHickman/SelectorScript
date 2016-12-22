@@ -1,5 +1,5 @@
 import { error } from './common';
-var parser = <Parser>require("./parser");
+var parser = <Parser>require("../parser");
 import * as _ from 'lodash';
 
 interface Parser{

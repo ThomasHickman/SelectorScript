@@ -1,7 +1,7 @@
 /// <reference path="../node_modules/@types/jasmine/index.d.ts" />
 
 import { getBlockedAST } from '../src/parse';
-var parser = require('./parser');
+var parser = require('../parser');
 import fs = require('fs');
 
 var blockTest = 
