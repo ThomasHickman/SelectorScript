@@ -7,11 +7,9 @@
 
 
 Program = head:Statement tail:(NewLine Statement)* {
-    var statements = tail.map
     return {
         type: "Program",
-        code: [head].concat(tail.map(x => x[1])),
-        newLines: tail.map(x => x[0])
+        code: [head].concat(tail.map(x => x[1]))
     }
 }
 

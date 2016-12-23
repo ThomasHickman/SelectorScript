@@ -1,7 +1,6 @@
 interface Program{
     code: Code[];
-    type: "Program",
-    newLines: string[]
+    type: "Program"
 }
 
 type Code = Statement | Block;
