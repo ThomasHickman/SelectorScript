@@ -1,4 +1,24 @@
-interface Program{
+// pegjs definitons
+
+interface SourcePosition{
+    offset: number;
+    line: number;
+    column: number;
+}
+
+interface Location{
+    start: SourcePosition
+    end: SourcePosition
+}
+
+// AST definitons
+
+interface Node{
+    content: string,
+    location: Location
+}
+
+interface Program extends Node{
     code: Code[];
     type: "Program"
 }
@@ -12,14 +32,14 @@ interface Block {
 
 type Statement = Macro | SelectorStatement | BlockComment | Blank;
 
-interface StatementSkeleton{
+interface StatementSkeleton extends Node{
     tabs: string,
     lineComment?: LineComment;
 }
 
-interface LineComment{
+interface LineComment extends Node{
     type: "LineComment",
-    text: string
+    content: string
 }
 
 interface Macro extends StatementSkeleton{
@@ -46,34 +66,32 @@ interface Blank extends StatementSkeleton{
 
 type Literal = Id | IString | Selector | IObject | ISymbol
 
-interface Selector{
+interface Selector extends Node{
     type: "Selector",
-    text: string
+    content: string
 }
 
-interface IString{
+interface IString extends Node{
     type: "String";
-    text: string;
+    content: string;
     code: string;
 }
 
-interface IObject{
+interface IObject extends Node{
     type: "Object",
     properties: Property
 }
 
-interface Property{
+interface Property extends Node{
     type: "Property",
     name: string,
     expr: Literal
 }
 
-interface Id{
-    type: "Id",
-    text: string
+interface Id extends Node{
+    type: "Id"
 }
 
-interface ISymbol{
-    type: "Symbol",
-    text: string
+interface ISymbol extends Node{
+    type: "Symbol"
 }

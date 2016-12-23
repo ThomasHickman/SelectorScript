@@ -5,12 +5,26 @@
   *
 */
 
+{
+    function createNode(type, ob){
+        if(ob === undefined){
+            ob = {};
+        }
+
+        ob.type = type;
+        ob.text = text();
+        ob.location = location();
+    }
+
+    function createList(head, tail){
+        return [head].concat(tail.map(x => x[x.length - 1]));
+    }
+}
 
 Program = head:Statement tail:(NewLine Statement)* {
-    return {
-        type: "Program",
-        code: [head].concat(tail.map(x => x[1]))
-    }
+    return createNode("Program", {
+        code: createList(head, tail)
+    })
 }
 
 Statement = 
@@ -21,55 +35,59 @@ Statement =
               / Blank) _
     lineComment: LineComment? {
         if(typeof statement !== "object"){
-            return null;
+            throw new Error("Statement isn't an object");
         }
+
         statement.tabs = tabs;
         statement.lineComment = lineComment
-        return statement
+        return statement;
     }
 
 // Statements
 
 Macro = id:Id args:(_ Expression)* { 
-    return {
-        type: "Macro",
+    return createNode("Macro", {
         id: id,
         args: args.map(x => x[1])
-    }
+    })
 }
 
-SelectorStatement = selector: Selector _ func: Id args:(_ Expression)* { 
-    return {
-        type: "SelectorStatement",
+SelectorStatement = selector: Selector _ func: Id args:(_ "," _ Expression)* { 
+    return createNode("SelectorStatement", {
         selector: selector,
         func: func,
-        args: args.map(x => x[1])
-    }
+        args: args.map(x => x[x.length - 1])
+    })
 }
 
-LineComment = _ "//" text:AnythingSameLine { 
-    return {
-        type: "LineComment",
-        text: text
-    }
+LineComment = _ "//" content:AnythingSameLine { 
+    return createNode("LineComment", {
+        content: content
+    })
 }
 
 BlockComment = "/*" content: (!"/*" .)* "*/" { 
-    return {
-        type: "BlockComment",
-        content: string
-    }
+    return createNode("BlockComment", {
+        content: content
+    })
 }
 
 Blank = "" { 
-    return {
-        type: "Blank"
-    }
+    return createNode("Blank");
 }
-// Expressions
-Expression = "(" _ Expression2 _ ")" / Expression2
 
-Expression2 = Literal+
+// Expressions
+Expression = "(" _ expr: Expression _ ")"{
+    return createNode("Bracket", {
+        content: expr
+    })
+} / LiteralList
+
+LiteralList = head:Literal tail: (_ Literal)*{
+    return createNode("LiteralList", {
+        list: createList(head, tail);
+    })
+}
 
 // Literals
 Literal = Id / String / Selector / Object / Symbol
@@ -99,11 +117,11 @@ DoubleString = '"' txt: (DoubleStringCharacter*) '"'{
     return txt.join("")
 }
 
-DoubleStringCharacter = (!('"' / "\\" ) .) / '\\"' / "\\\\"{
+DoubleStringCharacter = ((!('"' / "\\" ) .) / '\\"' / "\\\\"){
     return text()
 }
 
-SingleStringCharacter = (!("'" / "\\") .) / "\\'" / "\\\\"{
+SingleStringCharacter = ((!("'" / "\\") .) / "\\'" / "\\\\"){
     return text()
 }
 
@@ -115,7 +133,7 @@ Object = "{" __ properties: PropertyList __ "}"{
 }
 
 PropertyList = head: Property tail: (__ "," __ Property)*{
-    return [head].concat(tail.map(x => x[3]))
+    return createList(head, tail)
 }
 
 Property = name: (String / Id) __ ":" __ expr:Expression {
@@ -126,7 +144,7 @@ Property = name: (String / Id) __ ":" __ expr:Expression {
     }
 }
 
-Symbol = [!£%^&*-+=@~#|\¬,.?]+ {
+Symbol = [!£%^&*-+=@~#|\¬.?]+ {
     return {
         type: "Symbol",
         text: text()
