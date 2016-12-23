@@ -41,7 +41,7 @@ function generateBlock(block: Block){
 
                 var macroOutputLines = potentialMacro.map(
                     line.args,
-                    generateExpression,
+                    generateLiteral,
                     generateBlock(macroBlock)
                 ).split("\n");
 
@@ -63,12 +63,12 @@ function generateBlock(block: Block){
 
 function generateSelectorStatement(stm: SelectorStatement){
     var jsSelector = generateSelector(stm.selector);
-    var args = stm.args.map(generateExpression).join(", ");
+    var args = stm.args.map(generateLiteral).join(", ");
 
     return `${jsSelector}.${stm.func.text}(${args})`
 }
 
-function generateExpression(expr: Expression): string{
+function generateLiteral(expr: Literal): string{
     if(expr.type === "String"){
         return `${expr.code}`// TODO: fix this
     }
