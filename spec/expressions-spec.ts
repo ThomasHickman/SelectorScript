@@ -19,7 +19,9 @@ describe("expressions", () => {
         var expression = parseExpression(testLiterals);
         expect(expression).toEqual({
             left: testLiterals[0],
-            operator: testLiterals[1],
+            operator: jasmine.objectContaining({
+                name: "shows"
+            }),
             right: testLiterals[2]
         })
     })
