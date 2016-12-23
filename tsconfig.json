@@ -5,6 +5,9 @@
         "noImplicitAny": false,
         "sourceMap": true,
         "strictNullChecks": true,
-        "outDir": "dist"
+        "outDir": "dist",
+        "lib": [
+            "es6"
+        ]
     }
 }
