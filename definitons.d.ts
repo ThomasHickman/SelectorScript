@@ -64,6 +64,17 @@ interface Blank extends StatementSkeleton{
     type: "Blank"
 }
 
+type Expression = Bracket | LiteralList;
+
+interface Bracket extends Node{
+    content: Expression
+}
+
+interface LiteralList extends Node{
+    type: "LiteralList";
+    list: Literal[]
+}
+
 type Literal = Id | IString | Selector | IObject | ISymbol
 
 interface Selector extends Node{
@@ -74,7 +85,6 @@ interface Selector extends Node{
 interface IString extends Node{
     type: "String";
     content: string;
-    code: string;
 }
 
 interface IObject extends Node{

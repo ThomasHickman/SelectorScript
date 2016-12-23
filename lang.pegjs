@@ -97,15 +97,14 @@ Literal = Id / String / Selector / Object / Symbol
 Selector = selector: (IDSelector / ClassSelector / ElementSelector){
     return {
         type: "Selector",
-        text: selector
+        content: selector
     }
 }
 
 String = str: (SingleString / DoubleString) {
     return {
         type: "String",
-        text: str, // TODO: fix this
-        code: text()
+        content: str, // TODO: fix this
     }
 }
 
