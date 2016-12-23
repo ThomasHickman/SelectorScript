@@ -78,8 +78,11 @@ function generateLiteral(expr: Literal): string{
     else if(expr.type === "Selector"){
         return generateSelector(expr);
     }
-    else{
+    else if(expr.type === "Object"){
         return generateObject(expr);
+    }
+    else{
+        throw error("Unknown literal");
     }
 }
 
