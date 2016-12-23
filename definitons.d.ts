@@ -26,14 +26,14 @@ interface LineComment{
 interface Macro extends StatementSkeleton{
     type: "Macro",
     id: Id,
-    args: Expression[]
+    args: Literal[]
 }
 
 interface SelectorStatement extends StatementSkeleton{
     type: "SelectorStatement",
     selector: Selector,
     func: Id,
-    args: Expression[]
+    args: Literal[]
 }
 
 interface BlockComment extends StatementSkeleton{
@@ -45,9 +45,7 @@ interface Blank extends StatementSkeleton{
     type: "Blank"
 }
 
-type Type = "Id" | "String" | "Selector" | "Object";
-
-type Expression = Id | IString | Selector | IObject
+type Literal = Id | IString | Selector | IObject | ISymbol
 
 interface Selector{
     type: "Selector",
@@ -68,10 +66,15 @@ interface IObject{
 interface Property{
     type: "Property",
     name: string,
-    expr: Expression
+    expr: Literal
 }
 
 interface Id{
     type: "Id",
+    text: string
+}
+
+interface ISymbol{
+    type: "Symbol",
     text: string
 }

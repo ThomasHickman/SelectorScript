@@ -68,12 +68,15 @@ Blank = "" {
         type: "Blank"
     }
 }
+// Expressions
+Expression = "(" _ Expression2 _ ")" / Expression2
 
-Expression = Literal+
+Expression2 = Literal+
 
+// Literals
 Literal = Id / String / Selector / Object / Symbol
 
-// Expressions
+// Literals
 
 Selector = selector: (IDSelector / ClassSelector / ElementSelector){
     return {
@@ -125,7 +128,12 @@ Property = name: (String / Id) __ ":" __ expr:Expression {
     }
 }
 
-Symbol = [!£%^&*-+=@~#|\¬,.?]+
+Symbol = [!£%^&*-+=@~#|\¬,.?]+ {
+    return {
+        type: "Symbol",
+        text: text()
+    }
+}
 
 // Selectors
 
