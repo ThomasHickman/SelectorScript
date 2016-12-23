@@ -53,7 +53,6 @@ export type Expression = Literal | {
 }
 
 export function parseExpression(literals: Literal[]){
-    debugger;
     var output = <Expression[]>[];
     var operatorStack = <Operator[]>[];
 
@@ -89,6 +88,8 @@ export function parseExpression(literals: Literal[]){
 
                 topOperator = _.last(operatorStack);
             }
+
+            operatorStack.push(currOperator);
         }
     }
 
