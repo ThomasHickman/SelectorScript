@@ -14,7 +14,7 @@ interface Location{
 // AST definitons
 
 interface Node{
-    content: string,
+    text: string,
     location: Location
 }
 
@@ -37,11 +37,6 @@ interface StatementSkeleton extends Node{
     lineComment?: LineComment;
 }
 
-interface LineComment extends Node{
-    type: "LineComment",
-    content: string
-}
-
 interface Macro extends StatementSkeleton{
     type: "Macro",
     id: Id,
@@ -53,6 +48,11 @@ interface SelectorStatement extends StatementSkeleton{
     selector: Selector,
     func: Id,
     args: Literal[]
+}
+
+interface LineComment extends Node{
+    type: "LineComment",
+    content: string
 }
 
 interface BlockComment extends StatementSkeleton{
