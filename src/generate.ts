@@ -70,7 +70,7 @@ function generateSelectorStatement(stm: SelectorStatement){
 
 function generateLiteral(expr: Literal): string{
     if(expr.type === "String"){
-        return `${expr.code}`// TODO: fix this
+        return `${expr.text}`// TODO: fix this
     }
     else if(expr.type === "Id"){
         return expr.text;

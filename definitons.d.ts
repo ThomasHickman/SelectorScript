@@ -14,6 +14,7 @@ interface Location{
 // AST definitons
 
 interface Node{
+    type: string,
     text: string,
     location: Location
 }

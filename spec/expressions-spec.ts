@@ -2,7 +2,7 @@
 import { parseExpression } from '../src/expressions';
 import * as expr from "../src/expressions";
 
-var testLiterals:Literal[] = [{
+var testLiterals = <Literal[]>[{
     type: "Selector",
     text: "#input"
 },{
@@ -10,8 +10,7 @@ var testLiterals:Literal[] = [{
     text: "shows"
 },{
     type: "String",
-    text: "hi",
-    code: "'hi'"
+    content: "hi"
 }]
 
 describe("expressions", () => {

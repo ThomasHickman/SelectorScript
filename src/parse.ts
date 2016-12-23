@@ -42,8 +42,8 @@ export function getBlockedAST(program: Program){
     var i = 0;
 
     return <Program>{
+        ...program,
         ...getBlocks(0),
-        newLines: program.newLines,
         type: "Program"
     };
 
