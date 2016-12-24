@@ -29,37 +29,20 @@ Program = head:Statement tail:(NewLine Statement)* {
 
 Statement = 
     tabs: Tabs 
-    statement:( Macro 
-              / SelectorStatement
-              / BlockComment) _
+    literals: Expression _
     lineComment: LineComment? {
-        if(statement == undefined){
-            return createNode("Blank");
+        if(literals == undefined){
+            return createNode("Blank", {
+                tabs: tabs,
+                lineComment: lineComment
+            });
         }
-
-        statement.tabs = tabs;
-        statement.lineComment = lineComment
-        return statement;
+        return createNode("Statement", {
+            tabs: tabs,
+            lineComment: lineComment,
+            literals: literals
+        })
     }
-
-// Statements
-
-Macro = id:Id args:(_ Literal)* { 
-    return createNode("Macro", {
-        id: id,
-        args: args.map(x => x[1])
-    })
-}
-
-SelectorStatement = selector: Selector _ funcHead: Id funcTail:(_ Id)* _ args: ExprList{ 
-    return createNode("SelectorStatement", {
-        selector: selector,
-        funcs: createList(funcHead, funcTail),
-        args: args.map(x => x[x.length - 1])
-    })
-}
-
-ExprList = (_ "," _ Expression)*
 
 LineComment = _ "//" content:AnythingSameLine { 
     return createNode("LineComment", {
