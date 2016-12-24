@@ -6,7 +6,7 @@
   "private": true,
   "scripts": {
     "test": "npm run-script build && jasmine",
-    "build": "pegjs lang.pegjs dist/parser.js",
+    "build": "pegjs -d lodash -o dist/parser.js lang.pegjs",
     "prepublish": "npm run build"
   },
   "author": "Thomas Hickman",
