@@ -178,7 +178,7 @@ ElementSelector = "@" id: (SelectorId / "*"){
     return id.text;
 }
 
-PseudoClass = (":"/"::") SelectorId ("(" Selector/Number ")")?
+PseudoClass = (":"/"::") SelectorId ("(" FullSelector/Number ")")?
 
 AttributeSelectorOp = "="/"~="/"^="/"$="/"*="/"|="
 
@@ -212,8 +212,6 @@ Id = [a-zA-Z_] [a-zA-Z_0-9]* {
         text: text()
     }
 }
-
-Number = [0-9]*
 
 Tabs = _
 
