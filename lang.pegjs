@@ -6,6 +6,11 @@
 */
 
 {
+    var _ = lodash/*{
+    	flatten: x => x,
+        compact: x => x
+    };*/
+    
     function createNode(type, ob){
         if(ob === undefined){
             ob = {};
@@ -14,6 +19,8 @@
         ob.type = type;
         ob.text = text();
         ob.location = location();
+        
+        return ob;
     }
 
     function createList(head, tail){
@@ -29,7 +36,7 @@ Program = head:Statement tail:(NewLine Statement)* {
 
 Statement = 
     tabs: Tabs 
-    literals: Expression _
+    literals: Expression? _
     lineComment: LineComment? {
         if(literals == undefined){
             return createNode("Blank", {
