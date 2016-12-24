@@ -31,11 +31,10 @@ Statement =
     tabs: Tabs 
     statement:( Macro 
               / SelectorStatement
-              / BlockComment
-              / Blank) _
+              / BlockComment) _
     lineComment: LineComment? {
-        if(typeof statement !== "object"){
-            throw new Error("Statement isn't an object");
+        if(statement == undefined){
+            return createNode("Blank");
         }
 
         statement.tabs = tabs;
@@ -45,20 +44,22 @@ Statement =
 
 // Statements
 
-Macro = id:Id args:(_ Expression)* { 
+Macro = id:Id args:(_ Literal)* { 
     return createNode("Macro", {
         id: id,
         args: args.map(x => x[1])
     })
 }
 
-SelectorStatement = selector: Selector _ func: Id args:(_ "," _ Expression)* { 
+SelectorStatement = selector: Selector _ funcHead: Id funcTail:(_ Id)* _ args: ExprList{ 
     return createNode("SelectorStatement", {
         selector: selector,
-        func: func,
+        funcs: createList(funcHead, funcTail),
         args: args.map(x => x[x.length - 1])
     })
 }
+
+ExprList = (_ "," _ Expression)*
 
 LineComment = _ "//" content:AnythingSameLine { 
     return createNode("LineComment", {
@@ -72,10 +73,6 @@ BlockComment = "/*" content: (!"/*" .)* "*/" {
     })
 }
 
-Blank = "" { 
-    return createNode("Blank");
-}
-
 // Expressions
 Expression = "(" _ expr: Expression _ ")"{
     return createNode("Bracket", {
@@ -85,7 +82,7 @@ Expression = "(" _ expr: Expression _ ")"{
 
 LiteralList = head:Literal tail: (_ Literal)*{
     return createNode("LiteralList", {
-        list: createList(head, tail);
+        list: createList(head, tail)
     })
 }
 
@@ -93,13 +90,6 @@ LiteralList = head:Literal tail: (_ Literal)*{
 Literal = Id / String / Selector / Object / Symbol
 
 // Literals
-
-Selector = selector: (IDSelector / ClassSelector / ElementSelector){
-    return {
-        type: "Selector",
-        content: selector
-    }
-}
 
 String = str: (SingleString / DoubleString) {
     return {
@@ -151,15 +141,40 @@ Symbol = [!£%^&*-+=@~#|\¬.?]+ {
 }
 
 // Selectors
+// https://www.w3.org/TR/selectors/#context
 
-IDSelector = "#" Id{
+IDSelector = "#" SelectorId{
     return text();
 }
-ClassSelector = "." Id{
+ClassSelector = "." SelectorId{
     return text();
 }
-ElementSelector = "@" id: Id{
+ElementSelector = "@" id: (SelectorId / "*"){
     return id.text;
+}
+
+PseudoClass = (":"/"::") SelectorId ("(" Selector/Number ")")?
+
+AttributeSelectorOp = "="/"~="/"^="/"$="/"*="/"|="
+
+AttributeSelector = "[" SelectorId (AttributeSelectorOp (SelectorId/String))? "]"
+
+BasicSelector = value:(
+    (IDSelector / ClassSelector / ElementSelector)
+    PseudoClass? AttributeSelector?){
+        return _.compact(_.flatten(value)).join("");
+    }
+
+CombinatorOp = " "/">"/"+"/"~"/"," // treating "," as a combinator for simplicity
+
+FullSelector = BasicSelector (CombinatorOp BasicSelector)*{
+    return _.compact(_.flatten(value)).join("");
+}
+
+// https://www.w3.org/TR/CSS21/syndata.html#value-def-identifier
+// TODO: at some point I could implement the proper spec
+SelectorId = [a-zA-Z_] [a-zA-Z_\-0-9]*{
+    return text();
 }
 
 Id = [a-zA-Z_] [a-zA-Z_0-9]* {
@@ -168,6 +183,8 @@ Id = [a-zA-Z_] [a-zA-Z_0-9]* {
         text: text()
     }
 }
+
+Number = [0-9]*
 
 Tabs = _
 
