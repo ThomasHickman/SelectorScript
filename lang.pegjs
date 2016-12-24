@@ -57,7 +57,9 @@ BlockComment = "/*" content: (!"/*" .)* "*/" {
 }
 
 // Expressions
-Expression = "(" _ expr: Expression _ ")"{
+Expression = "(" _ selector: FullSelector _ ")"{
+    return selector
+} / "(" _ expr: Expression _ ")"{
     return createNode("Bracket", {
         content: expr
     })
@@ -70,9 +72,49 @@ LiteralList = head:Literal tail: (_ Literal)*{
 }
 
 // Literals
-Literal = Id / String / Selector / Object / Symbol
+Literal = BasicSelector / Id / String / Number / Object / Symbol
 
 // Literals
+
+// modified from https://github.com/pegjs/pegjs/blob/205c55d3099ed8247a274a6aec7914356224bae3/examples/javascript.pegjs
+
+Number "number"
+  = literal:HexIntegerLiteral
+  / literal:DecimalLiteral{
+      return text();
+  }
+
+DecimalLiteral
+  = DecimalIntegerLiteral "." DecimalDigit* ExponentPart?
+  / "." DecimalDigit+ ExponentPart?
+  / DecimalIntegerLiteral ExponentPart?
+
+DecimalIntegerLiteral
+  = "0"
+  / NonZeroDigit DecimalDigit*
+
+DecimalDigit
+  = [0-9]
+
+NonZeroDigit
+  = [1-9]
+
+ExponentPart
+  = ExponentIndicator SignedInteger
+
+ExponentIndicator
+  = "e"i
+
+SignedInteger
+  = [+-]? DecimalDigit+
+
+HexIntegerLiteral
+  = "0x"i digits:$HexDigit+
+
+HexDigit
+  = [0-9a-f]i
+
+// end copied region
 
 String = str: (SingleString / DoubleString) {
     return {
@@ -145,13 +187,17 @@ AttributeSelector = "[" SelectorId (AttributeSelectorOp (SelectorId/String))? "]
 BasicSelector = value:(
     (IDSelector / ClassSelector / ElementSelector)
     PseudoClass? AttributeSelector?){
-        return _.compact(_.flatten(value)).join("");
+        return createNode("Selector", {
+            content: _.compact(_.flatten(value)).join("")
+        })
     }
 
 CombinatorOp = " "/">"/"+"/"~"/"," // treating "," as a combinator for simplicity
 
 FullSelector = BasicSelector (CombinatorOp BasicSelector)*{
-    return _.compact(_.flatten(value)).join("");
+    return createNode("Selector", {
+        content: _.compact(_.flatten(value)).join("")
+    })
 }
 
 // https://www.w3.org/TR/CSS21/syndata.html#value-def-identifier
