@@ -88,7 +88,7 @@ Literal = BasicSelector / Id / String / Number / Object / Symbol
 Number "number"
   = literal:HexIntegerLiteral
   / literal:DecimalLiteral{
-      return text();
+      return createNode("Number");
   }
 
 DecimalLiteral
@@ -126,7 +126,7 @@ HexDigit
 String = str: (SingleString / DoubleString) {
     return {
         type: "String",
-        content: str, // TODO: fix this
+        content: str,
     }
 }
 

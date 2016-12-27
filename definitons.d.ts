@@ -31,24 +31,11 @@ interface Block {
     code: Code[];
 }
 
-type Statement = Macro | SelectorStatement | BlockComment | Blank;
-
-interface StatementSkeleton extends Node{
-    tabs: string,
+interface Statement extends Node{
+    type: "Statement";
+    literals: Expression;
+    tabs: string;
     lineComment?: LineComment;
-}
-
-interface Macro extends StatementSkeleton{
-    type: "Macro",
-    id: Id,
-    args: Literal[]
-}
-
-interface SelectorStatement extends StatementSkeleton{
-    type: "SelectorStatement",
-    selector: Selector,
-    func: Id,
-    args: Literal[]
 }
 
 interface LineComment extends Node{
@@ -56,16 +43,13 @@ interface LineComment extends Node{
     content: string
 }
 
-interface BlockComment extends StatementSkeleton{
-    type: "BlockComment",
-    content: string
-}
-
-interface Blank extends StatementSkeleton{
+interface Blank extends Node {
     type: "Blank"
+    tabs: string;
+    lineComment?: LineComment;
 }
 
-type Expression = Bracket | LiteralList;
+type Expression = Bracket | LiteralList | Selector;
 
 interface Bracket extends Node{
     content: Expression
@@ -76,7 +60,7 @@ interface LiteralList extends Node{
     list: Literal[]
 }
 
-type Literal = Id | IString | Selector | IObject | ISymbol
+type Literal = Id | IString | Selector | IObject | ISymbol | INumber
 
 interface Selector extends Node{
     type: "Selector",
@@ -86,6 +70,10 @@ interface Selector extends Node{
 interface IString extends Node{
     type: "String";
     content: string;
+}
+
+interface INumber extends Node{
+    type: "Number"
 }
 
 interface IObject extends Node{
