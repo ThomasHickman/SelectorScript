@@ -24,7 +24,7 @@ interface Program extends Node{
     type: "Program"
 }
 
-type Code = Statement | Block;
+type Code = Statement | Block | Blank;
 
 interface Block {
     type: "Block",
@@ -33,7 +33,7 @@ interface Block {
 
 interface Statement extends Node{
     type: "Statement";
-    literals: Expression;
+    literals: LiteralList;
     tabs: string;
     lineComment?: LineComment;
 }
@@ -49,10 +49,9 @@ interface Blank extends Node {
     lineComment?: LineComment;
 }
 
-type Expression = Bracket | LiteralList | Selector;
-
-interface Bracket extends Node{
-    content: Expression
+interface BrackettedExpression extends Node{
+    type: "BrackettedExpression"
+    content: LiteralList
 }
 
 interface LiteralList extends Node{
@@ -60,7 +59,7 @@ interface LiteralList extends Node{
     list: Literal[]
 }
 
-type Literal = Id | IString | Selector | IObject | ISymbol | INumber
+type Literal = BrackettedExpression | Id | IString | Selector | IObject | ISymbol | INumber
 
 interface Selector extends Node{
     type: "Selector",

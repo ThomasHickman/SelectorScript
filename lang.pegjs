@@ -36,7 +36,7 @@ Program = head:Statement tail:(NewLine Statement)* {
 
 Statement = 
     tabs: Tabs 
-    literals: Expression? _
+    literals: LiteralList? _
     lineComment: LineComment? {
         if(literals == undefined){
             return createNode("Blank", {
@@ -63,15 +63,6 @@ BlockComment = "/*" content: (!"/*" .)* "*/" {
     })
 }
 
-// Expressions
-Expression = "(" _ selector: FullSelector _ ")"{
-    return selector
-} / "(" _ expr: Expression _ ")"{
-    return createNode("Bracket", {
-        content: expr
-    })
-} / LiteralList
-
 LiteralList = head:Literal tail: (_ Literal)*{
     return createNode("LiteralList", {
         list: createList(head, tail)
@@ -79,9 +70,17 @@ LiteralList = head:Literal tail: (_ Literal)*{
 }
 
 // Literals
-Literal = BasicSelector / Id / String / Number / Object / Symbol
+Literal = BrackettedSelector / BracketedExpression / BasicSelector / Id / String / Number / Object / Symbol
 
-// Literals
+BrackettedSelector = "(" _ selector: FullSelector _ ")"{
+    return selector
+}
+
+BracketedExpression = "(" _ lst: LiteralList _ ")"{
+    return createNode("BracketedExpression", {
+        content: lst
+    })
+}
 
 // modified from https://github.com/pegjs/pegjs/blob/205c55d3099ed8247a274a6aec7914356224bae3/examples/javascript.pegjs
 
@@ -157,7 +156,7 @@ PropertyList = head: Property tail: (__ "," __ Property)*{
     return createList(head, tail)
 }
 
-Property = name: (String / Id) __ ":" __ expr:Expression {
+Property = name: (String / Id) __ ":" __ expr:LiteralList {
     return {
         type: "Property",
         name: "name",
