@@ -49,10 +49,15 @@ function getOperator(literal: Literal): Operator | undefined{
 export type Expression = Literal | {
     left: Expression,
     operator: Operator,
-    right: Expression
+    right: Expression,
+    type: "InfixExpression"
+} | {
+    operator: Operator
+    right: Expression,
+    type: "PrefixExpression"
 }
 
-export function parseExpression(literals: Literal[]){
+export function reduceLiteralsToExpression(literals: Literal[]){
     var output = <Expression[]>[];
     var operatorStack = <Operator[]>[];
 
@@ -64,32 +69,64 @@ export function parseExpression(literals: Literal[]){
         }
 
         output.push({
+            type: "InfixExpression",
             left: left,
             operator: lastOperator,
             right: right
         })
     }
 
-    for(var literal of literals){
+    var lastLiteralWasConst = false;
+
+    for(var i = 0;i<literals.length;i++){
+        let literal = literals[i];
+
         var currOperator = getOperator(literal);
 
         if(currOperator === undefined){
+            if(lastLiteralWasConst){
+                // end of expression
+                break;
+            }
+
+            lastLiteralWasConst = true;
             output.push(literal);
         }
         else{
-            var topOperator = _.last(operatorStack);
+            if(lastLiteralWasConst){
+                // Use prefix
+                var rightLiteral = literals[i+1];
 
-            while(operatorStack.length !== 0 &&
-                ((topOperator.leftAccoc && topOperator.priority <= currOperator.priority)
-                ||(!topOperator.leftAccoc && topOperator.priority <= currOperator.priority))
-            ){
-                // consume operator
-                consumeOperator();
+                if(rightLiteral === undefined){
+                    throw error("Unvalid trailing operator", literal.location);
+                }
 
-                topOperator = _.last(operatorStack);
+                output.push({
+                    type: "PrefixExpression",
+                    operator: currOperator,
+                    right: rightLiteral
+                })
+                
+                i++;
+            }
+            else{
+                // Use infix
+                var topOperator = _.last(operatorStack);
+
+                while(operatorStack.length !== 0 &&
+                    ((topOperator.leftAccoc && topOperator.priority <= currOperator.priority)
+                    ||(!topOperator.leftAccoc && topOperator.priority <= currOperator.priority))
+                ){
+                    // consume operator
+                    consumeOperator();
+
+                    topOperator = _.last(operatorStack);
+                }
+
+                operatorStack.push(currOperator);
             }
 
-            operatorStack.push(currOperator);
+            lastLiteralWasConst = false;
         }
     }
 

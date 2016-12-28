@@ -1,5 +1,5 @@
 /// <reference path="../node_modules/@types/jasmine/index.d.ts" />
-import { parseExpression } from '../src/expressions';
+import { reduceLiteralsToExpression } from '../src/expressions';
 import * as expr from "../src/expressions";
 
 var testLiterals = <Literal[]>[{
@@ -15,7 +15,7 @@ var testLiterals = <Literal[]>[{
 
 describe("expressions", () => {
     it("parses an expression", () => {
-        var expression = parseExpression(testLiterals);
+        var expression = reduceLiteralsToExpression(testLiterals);
         expect(expression).toEqual({
             left: testLiterals[0],
             operator: jasmine.objectContaining({
