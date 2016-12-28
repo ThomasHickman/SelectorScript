@@ -1,3 +1,5 @@
+import { hostname } from 'os';
+import { MacroDef } from './macros';
 import macros from './macros';
 import { error } from './common';
 import * as _ from 'lodash';
@@ -16,7 +18,7 @@ export default function generateProgram(program: Program){
 function generateBlock(block: Block){
     var code: string[] = [];
 
-    function addStyle(line: Statement, generatedCode: string){
+    function addStyle(line: Statement | Blank, generatedCode: string){
         var commentRegion = "";
         if(line.lineComment){
             commentRegion = `  //${line.lineComment}`;
@@ -25,40 +27,67 @@ function generateBlock(block: Block){
     }
 
     for(var i = 0;i < block.code.length;i++){
-        var _line = block.code[i];
-        if(_line.type === "Macro"){
-            (line => {
-                var potentialMacro = _.find(macros, macro => macro.id == line.id.text);
-                
-                if(potentialMacro === undefined){
-                    throw error(`Undefined macro ${line.id.text}`);
-                }
+        var line = block.code[i];
+        var nextLine = <Code | undefined>block.code[i + 1];
+        var statementBlock: Block | undefined = undefined;
 
-                var macroBlock = block.code[i + 1];
-                if(macroBlock === undefined || macroBlock.type !== "Block"){
-                    throw error("Block not found after macro");
-                }
-
-                var macroOutputLines = potentialMacro.map(
-                    line.args,
-                    generateLiteral,
-                    generateBlock(macroBlock)
-                ).split("\n");
-
-                code.push([
-                    addStyle(line, macroOutputLines[0]),
-                    ...macroOutputLines.slice(1)
-                ].join("\n"));
-
-                i++;
-            })(_line);
+        if(nextLine !== undefined && nextLine.type === "Block"){
+            i++;
+            statementBlock = nextLine;
         }
-        else if(_line.type === "SelectorStatement"){
-            code.push(addStyle(_line, generateSelectorStatement(_line)) + ";");
+
+        if(line.type === "Blank"){
+            code.push(addStyle(line, generateBlankLine(line, statementBlock)));
+        }
+        else if(line.type === "Statement"){
+            code.push(addStyle(line, generateStatement(line, statementBlock)))
+        }
+        else{
+            throw error("Internal Error: Got a block before a line")
         }
     }
 
     return code.join("\n");
+}
+
+function generateBlankLine(stm: Blank, block?: Block){
+    if(block !== undefined){
+        throw error("Cannot have a block after a line with no effect", stm.location);
+    }
+
+    return "";
+}
+
+function generateStatement(stm: Statement, block?: Block){
+    if(stm.literals[0].type !== "Id"){
+        // Parse as expression statement
+        return generateExpressionStatement(stm, block);
+    }
+    else{
+        var potentialMacro = _.find(macros, macro => macro.id == stm.literals[0]);
+        if(potentialMacro === undefined){
+            return generateExpressionStatement(stm, block);
+        }
+        return generateMacroStatement(potentialMacro, stm, block);
+    }
+}
+
+function generateMacroStatement(macro: MacroDef, stm: Statement, block?: Block){
+    if(block === undefined){
+        throw error("Block not found after macro", stm.location);
+    }
+
+    macro.map(
+        stm.literals.list,
+        generateLiteral,
+        generateBlock(block)
+    )
+
+    // Do something else
+}
+
+function generateExpressionStatement(stm: Statement, block?: Block){
+    // Do parsing
 }
 
 function generateSelectorStatement(stm: SelectorStatement){
