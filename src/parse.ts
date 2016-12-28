@@ -54,7 +54,7 @@ export function getBlockedAST(program: Program){
         }
 
         for(;i < program.code.length;i++){
-            var line = <Statement>program.code[i];
+            var line = <Statement | Blank>program.code[i];
 
             if(line.tabs === "" && tab === null){
                 newBlock.code.push(line);
