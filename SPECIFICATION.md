@@ -5,7 +5,7 @@
 ## Macros
 
 ```
-Macro [BracketedLiterals]
+Macro BracketedLiterals[]
 
 separator of BracketedLiterals is " "
 
@@ -15,8 +15,8 @@ User defined macros (if, else, on, loop)
 ## Statements
 
 ```
-Expression Id [Expression]
-    Id2 [ExpressionA]
+Expression Id Expression[]
+    Id2 ExpressionA[]
     ...
  => (Exp).Id(Exp1, ...).Id2(ExpA1 ...)
 ```
